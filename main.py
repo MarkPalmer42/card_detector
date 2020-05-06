@@ -1,5 +1,9 @@
 
+import os
 import convert_video as cv
 
 
-cv.convert_video_to_frames('dataset/original_dataset', 'dataset/converted_dataset', '.mov')
+original_dataset = os.path.join('dataset', 'original_dataset')
+converted_dataset = os.path.join('dataset', 'converted_dataset')
+
+cv.convert_video_to_frames(original_dataset, converted_dataset, '.mov')
