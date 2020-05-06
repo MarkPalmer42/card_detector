@@ -4,14 +4,13 @@ import os
 import folder_utils as fu
 
 
-def convert_video_to_frames(video_path, target_path, video_extension='.mov', create_dir=True, verbose=True):
+def convert_video_to_frames(video_path, target_path, video_extension='.mov', verbose=True):
     """
     Converts all the videos from the video_path to jpeg frames and stores them in the target_path.
     The target path will be truncated before the conversion.
     :param video_path: The path of the input video files.
     :param target_path: The path to store the generated jpeg images. Will be truncated.
     :param video_extension: The extension of the videos to convert.
-    :param create_dir: If set to true, a folder will be created in target_path for each video.
     :param verbose: Writes to the consoles which file is being converted.
     :return: -
     """
@@ -29,9 +28,9 @@ def convert_video_to_frames(video_path, target_path, video_extension='.mov', cre
         # Remove extension from file name
         file_name = video_file[0: len(video_file) - len(video_extension)].split(os.sep)[-1]
 
-        # Create directory for the video file if necessary
-        if create_dir:
-            folder_path = os.path.join(target_path, file_name)
+        # Create directory for the video file if it doesn't exist
+        folder_path = os.path.join(target_path, file_name)
+        if not os.path.exists(folder_path):
             os.mkdir(folder_path)
 
         # Open video file
