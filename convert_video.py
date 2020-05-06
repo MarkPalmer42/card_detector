@@ -16,7 +16,7 @@ def convert_video_to_frames(video_path, target_path, video_extension='.mov', ver
     """
 
     # Create target path if not exists, truncate otherwise
-    fu.created_truncated_folder(target_path)
+    fu.create_truncated_folder(target_path)
 
     # Loop over files in the video_path folder
     for video_file in fu.list_files(video_path, video_extension):

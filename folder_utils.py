@@ -25,7 +25,7 @@ def list_files(path, extension):
     return file_list
 
 
-def created_truncated_folder(path):
+def create_truncated_folder(path):
     """
     Deletes all the contents of the given folder.
     If the folder doesn't exists, creates it.

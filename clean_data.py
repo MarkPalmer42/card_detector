@@ -63,7 +63,7 @@ def clean_image(source_path, target_path, threshold, image_extension='.jpg', ver
     :return: -
     """
     # Create target path if not exists, truncate otherwise
-    fu.created_truncated_folder(target_path)
+    fu.create_truncated_folder(target_path)
 
     # Loop over files in the source_path folder
     for image_file in fu.list_files(source_path, image_extension):
