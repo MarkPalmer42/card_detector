@@ -4,7 +4,7 @@ import os
 import folder_utils as fu
 
 
-def convert_video_to_frames(video_path, target_path, video_extension, create_dir=True, verbose=True):
+def convert_video_to_frames(video_path, target_path, video_extension='.mov', create_dir=True, verbose=True):
     """
     Converts all the videos from the video_path to jpeg frames and stores them in the target_path.
     The target path will be truncated before the conversion.
