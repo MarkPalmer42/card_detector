@@ -16,7 +16,7 @@ def clean_numpy_array(array, clean_threshold):
     """
 
     # Calculate the threshold based on the average of the input image.
-    avg_threshold = np.average(array) * clean_threshold
+    avg_threshold = np.average(array, axis=(1, 0)) * clean_threshold
 
     # Traverse the columns of the image.
     for i in range(array.shape[0]):
@@ -25,13 +25,13 @@ def clean_numpy_array(array, clean_threshold):
 
         # Find the first pixel in the row that is not part of the background
         for j in range(array.shape[1]):
-            if np.average(array[i][j]) > avg_threshold:
+            if np.all(array[i][j] > avg_threshold):
                 first_block_end = j
                 break
 
         # Find the last pixel in the row that is not part of the background
         for j in reversed(range(array.shape[1])):
-            if np.average(array[i][j]) > avg_threshold:
+            if np.all(array[i][j] > avg_threshold):
                 second_block_start = j
                 break
 
