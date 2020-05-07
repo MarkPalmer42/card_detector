@@ -58,6 +58,7 @@ def clean_image(source_path, target_path, threshold, image_extension='.jpg', ver
     Cleans all the images in the given source path and saves them to target_path.
     :param source_path: The path containing the images, traversed recursively.
     :param target_path: The path to save the cleaned images to.
+    :param threshold: The threshold used for cleaning the image.
     :param image_extension: The extension of the images.
     :param verbose: Writes to the consoles which file is being converted.
     :return: -
