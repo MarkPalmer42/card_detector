@@ -31,15 +31,16 @@ def normalize_array(array):
     return np.divide(np.subtract(array, minval), maxval - minval)
 
 
-def clean_vectorized(array):
+def get_mask_for_bluebox_image(image):
     """
-    A vectorized version of cleaning an image for bluebox technique.
-    :param array: The input array.
-    :param clean_threshold: The threshold for cleaning.
-    :return: The cleaning image.
+    Calculates a boolean mask for a bluebox image.
+    An input image of dimensions (x, y, 3) will yield a (x, y) dimensional boolean mask,
+    indicating which pixels should be kept and which ones should be discarded.
+    :param image: The input image.
+    :return: The bluebox boolean mask.
     """
     # Normalize the input array for convenience.
-    normalized_array = normalize_array(array)
+    normalized_array = normalize_array(image)
 
     # Calculate the color keys. (Note: in the image, RGB values are reversed: BGR)
     color_keys = color_keying(normalized_array, list(reversed(cfg.bluebox_color)))
@@ -47,13 +48,24 @@ def clean_vectorized(array):
     # Normalize the color key array.
     color_diff = normalize_array(color_keys)
 
-    # Calculate the mask for blue boxing.
-    mask = color_diff > cfg.bluebox_threshold
+    # Calculate and return the mask for blue boxing.
+    return color_diff > cfg.bluebox_threshold
+
+
+def clean_vectorized(array):
+    """
+    A vectorized version of cleaning an image for bluebox technique.
+    :param array: The input array.
+    :param clean_threshold: The threshold for cleaning.
+    :return: The cleaning image.
+    """
+    # Get the bluebox boolean mask for the image.
+    mask = get_mask_for_bluebox_image(array)
 
     # Create numpy arrays for masking purposes.
-    ones = np.ones(normalized_array.shape)
-    cleaned_image = np.zeros(normalized_array.shape)
-    mask_image = np.zeros(normalized_array.shape)
+    ones = np.ones(array.shape)
+    cleaned_image = np.zeros(array.shape)
+    mask_image = np.zeros(array.shape)
 
     # Mask out the unnecessary parts.
     cleaned_image[mask] = array[mask]
