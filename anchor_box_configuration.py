@@ -80,7 +80,7 @@ class anchor_box_config:
         """
         return self.anchor_boxes.shape[2]
 
-    def get_matching_anchor_box(self, box):
+    def get_matching_anchor_box_indices(self, box):
         """
         Finds the anchor box in the configuration that matches the given box the most.
         :param box: The boundary box to find an anchor box for.
@@ -100,4 +100,4 @@ class anchor_box_config:
                         maxval = iou
                         idi, idj, idk = i, j, k
 
-        return (idi, idj, idk), self.anchor_boxes.item((idi, idj, idk)).get_yolo_coords()
+        return idi, idj, idk

@@ -70,7 +70,7 @@ def get_yolo_output_from_image(image, anchor_box_conf, class_count, current_clas
     box = determine_boundary_box(image)
 
     # Determine the matching anchor box.
-    (idi, idj, idk), yolo_coords = anchor_box_conf.get_matching_anchor_box(box)
+    (idi, idj, idk) = anchor_box_conf.get_matching_anchor_box_indices(box)
 
     anchor_box_per_grid = anchor_box_conf.get_anchor_boxes_per_grid_cell()
     (grid_v, grid_h) = anchor_box_conf.get_grid_dimensions()
@@ -84,7 +84,7 @@ def get_yolo_output_from_image(image, anchor_box_conf, class_count, current_clas
             for k in range(anchor_box_per_grid):
                 output[i][j][k][0] = 0.0
 
-    (x, y, w, h) = yolo_coords
+    (x, y, w, h) = box.get_yolo_coords()
 
     # Set the yolo coords for the anchor box of the object.
     output[idi][idj][idk][0] = 1.0
