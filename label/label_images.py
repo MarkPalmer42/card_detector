@@ -1,11 +1,11 @@
 
 import os
-import folder_utils as fu
+from utilities import folder_utils as fu
 import cv2
 import numpy as np
-import box as ab
-import config as cfg
-import clean_data as cd
+from yolo import box as ab
+from config import config as cfg
+from cleaning import clean_data as cd
 
 
 def get_boundary_box_from_image(image):
@@ -182,7 +182,7 @@ def get_boundary_box(source_path, image_extension='.jpg', verbose=True):
 
 def label_images(source_path, target_path, anchor_box_config, image_extension='.jpg', verbose=True):
     """
-    Traverses trough the source_path, labeling all images found.
+    Traverses trough the source_path, label all images found.
     The images have to be cleaned with black background.
     :param source_path: The path containing the images, traversed recursively.
     :param target_path: The path to save the labels into.

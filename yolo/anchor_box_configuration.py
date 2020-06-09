@@ -1,5 +1,4 @@
-
-import box as ab
+from yolo import box as ab
 import numpy as np
 
 
