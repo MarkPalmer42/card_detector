@@ -35,7 +35,7 @@ transformed_folder = 'transformed_dataset'
 save_all_data = True
 
 """
-    The frequency of skipping images from the input video files. 1 does not skip, 2 skips each 2nd,
-    3 skips each 3rd, etc...
+    The frequency of keeping images from the input video files. 1 does not skip, 2 keeps each 2nd,
+    3 keeps each 3rd, etc...
 """
-skip_images = 1
+keep_images = 3

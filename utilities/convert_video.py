@@ -37,7 +37,7 @@ def convert_video_to_images(source_path, target_path, video_extension='mov', ima
         # Loop over the frames of the video
         while success:
 
-            if counter % dc.skip_images == 0:
+            if counter % dc.keep_images == 0:
                 cv2.imwrite(os.path.join(target_path, str(index) + '.' + image_extension), image)
                 labels.append([0.0] * c)
                 labels[-1][cls] = 1.0
