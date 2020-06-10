@@ -162,7 +162,7 @@ def get_boundary_box(source_path, image_extension='.jpg', verbose=True):
 
 
     # Loop over files in the source_path folder
-    for image_file in fu.list_files(source_path, image_extension):
+    for image_file in fu.list_video_files_with_class(source_path, image_extension):
 
         if verbose:
             print("Labeling " + image_file)
@@ -196,7 +196,7 @@ def label_images(source_path, target_path, anchor_box_config, image_extension='.
     labels = {}
 
     # Loop over files in the source_path folder
-    for image_file in fu.list_files(source_path, image_extension):
+    for image_file in fu.list_video_files_with_class(source_path, image_extension):
 
         if verbose:
             print("Labeling " + image_file)

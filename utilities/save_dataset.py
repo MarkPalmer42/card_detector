@@ -53,7 +53,7 @@ def save_dataset(path, dataset, image_extension='jpg', use_config_switch=True):
         if len(dirlist) == 0:
             index = 0
         else:
-            index = next(reversed(sorted(get_num_list(dirlist))), 0)
+            index = next(reversed(sorted(get_num_list(dirlist))), 0) + 1
 
         for i in range(len(dataset)):
 
@@ -62,21 +62,23 @@ def save_dataset(path, dataset, image_extension='jpg', use_config_switch=True):
             index = index + 1
 
 
-def get_saved_dims(label_file_path):
+def read_contents(label_file_path):
     """
     Retrieves the dimensions of the labels in the given label file.
     :param label_file_path:
     :return: Dimensions of the saved labels.
     """
     dims = []
+    labels = []
 
     if os.path.exists(label_file_path):
 
         # The first line of the file should contain the dimensions of the labels.
         with open(label_file_path, 'r') as handle:
-            dims = [int(x) for x in next(handle).split()]
+            dims = [int(x) for x in next(handle).split('\t')]
+            labels = [float(x) for x in next(handle).split('\t')]
 
-    return dims
+    return np.array(dims), np.array(labels)
 
 
 def save_labels(path, labels, use_config_switch=True):
@@ -91,21 +93,20 @@ def save_labels(path, labels, use_config_switch=True):
 
         label_path = os.path.join(path, 'labels.txt')
 
-        label_text = []
+        dims, current_labels = read_contents(label_path)
 
-        dims = get_saved_dims(label_path)
+        if dims.size == 0:
+            dims = labels.shape
+            current_labels = np.ndarray.flatten(labels)
+        else:
+            dims[0] = int(dims[0] + labels.shape[0])
+            current_labels = np.concatenate((current_labels, labels), axis=None)
 
-        for label in labels:
-            label_text.append('\t'.join(str(x) for x in np.ndarray.flatten(np.array(label))))
+        handle = open(os.path.join(path, 'labels.txt'), 'w')
 
-        label_text = ['\t'.join(str(x) for x in labels.shape)]
+        handle.write('\t'.join(str(x) for x in dims) + '\n')
 
-        handle = open(os.path.join(path, 'labels.txt'), 'a+')
-
-        if not dims == []:
-            handle.write('\t'.join([str(x) for x in dims]) + '\n')
-
-        handle.write('\n'.join(label_text))
+        handle.write('\t'.join(str(x) for x in current_labels))
 
         handle.close()
 

@@ -3,11 +3,13 @@ import os
 import shutil
 
 
-def list_files(path, extension, cls=-1):
+def list_video_files_with_class(path, extension, cls=-1):
     """
-    Lists all the files with the given extension from the path recursively.
+    Lists all the files with the given extension from the path recursively with their classes.
+    Each folder represents one class, video files in the root folder have their own classes.
     :param path: The path to search.
     :param extension: The file extension to filter.
+    :param cls: The current class to be applied.
     :return: List of files with their paths combined.
     """
     file_list = []
@@ -26,7 +28,7 @@ def list_files(path, extension, cls=-1):
         file_path = os.path.join(path, v)
 
         if os.path.isdir(file_path):
-            file_list = file_list + list_files(file_path, extension, current_class)
+            file_list = file_list + list_video_files_with_class(file_path, extension, current_class)
 
         # Check if the extension matches
         elif v.lower().endswith(extension):
@@ -34,6 +36,31 @@ def list_files(path, extension, cls=-1):
 
         if not use_input_class:
             current_class = current_class + 1
+
+    return file_list
+
+
+def list_files(path, extension):
+    """
+    Lists all the files with the given extension from the path recursively.
+    :param path: The path to search.
+    :param extension: The file extension to filter.
+    :return: List of files with their paths combined.
+    """
+    file_list = []
+
+    # Loop over files in the path folder
+    for v in os.listdir(path):
+
+        # Check if item is directory
+        file_path = os.path.join(path, v)
+
+        if os.path.isdir(file_path):
+            file_list = file_list + list_files(file_path, extension)
+
+        # Check if the extension matches
+        elif v.lower().endswith(extension):
+            file_list.append(file_path)
 
     return file_list
 

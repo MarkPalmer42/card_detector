@@ -6,6 +6,7 @@ import os
 import utilities.save_dataset as sd
 import config.dataset_config as dc
 
+
 def convert_video_to_images(source_path, target_path, video_extension='mov', image_extension='jpg', verbose=True):
     """
     Converts the data set from the input videos to images.
@@ -24,7 +25,7 @@ def convert_video_to_images(source_path, target_path, video_extension='mov', ima
     index = 0
 
     # Loop over files in the video_path folder
-    for video_file, cls in fu.list_files(source_path, video_extension):
+    for video_file, cls in fu.list_video_files_with_class(source_path, video_extension):
 
         if verbose:
             print("Loading " + video_file)

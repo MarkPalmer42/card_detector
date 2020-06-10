@@ -38,4 +38,9 @@ save_all_data = True
     The frequency of keeping images from the input video files. 1 does not skip, 2 keeps each 2nd,
     3 keeps each 3rd, etc...
 """
-keep_images = 3
+keep_images = 1
+
+"""
+    True if the process status of the data set preparation should be written on the console, false otherwise.
+"""
+verbose = False

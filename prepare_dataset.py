@@ -33,18 +33,16 @@ for batch in ld.load_batch_images(dataset_paths['converted'], 128):
 
     (dataset, labels), index, len_batches = batch
 
-    print('Batch #' + str(index) + '/' + str(len_batches))
-
-    sd.save_all(dataset_paths['converted'], dataset, labels)
+    print('Batch #' + str(index + 1) + '/' + str(len_batches))
 
     masks = bm.get_masked_dataset(dataset)
 
     sd.save_all(dataset_paths['mask'], masks, labels)
 
-    clean_data = cd.clean_dataset(dataset, masks, verbose=True)
+    clean_data = cd.clean_dataset(dataset, masks, verbose=dc.verbose)
 
     sd.save_all(dataset_paths['cleaned'], clean_data, labels)
 
-    transformed_data, transformed_labels = tf.transform_image(clean_data, labels, verbose=True)
+    transformed_data, transformed_labels = tf.transform_image(clean_data, labels, verbose=dc.verbose)
 
     sd.save_all(dataset_paths['transformed'], transformed_data, transformed_labels)
