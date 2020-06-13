@@ -7,4 +7,4 @@ bluebox_color = [0, 0, 1]
 """
     The threshold for cleaning the original dataset.
 """
-bluebox_threshold = 0.22
+bluebox_threshold = 0.28
