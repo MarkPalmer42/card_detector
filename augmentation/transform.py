@@ -5,16 +5,14 @@ import scipy.ndimage as nd
 import utilities.console_util as cu
 
 
-def transform_image(dataset, labels, verbose=True):
+def transform_image_batch(dataset, verbose=True):
     """
     Applies flipping and rotation to the given data set.
     :param dataset: The data set to be augmented.
-    :param labels: The labels for the data set.
     :param verbose: Whether the process status should be written to the console.
     :return: The augmented data set as well as its labels.
     """
     transormed_data = []
-    transformed_labels = []
 
     for i in range(len(dataset)):
 
@@ -28,8 +26,16 @@ def transform_image(dataset, labels, verbose=True):
         for rotation in tc.rotations:
             transormed_data.append(nd.rotate(dataset[i], rotation, reshape=False))
 
+    return np.array(transormed_data)
+
+
+def transform_label_batch(labels):
+
+    transformed_labels = []
+
+    for i in range(len(labels)):
+
         for j in range(len(tc.rotations) + 3):
             transformed_labels.append(labels[i])
 
-    return np.array(transormed_data), np.array(transformed_labels)
-
+    return np.array(transformed_labels)

@@ -114,17 +114,19 @@ def get_labeled_image(image, boundary_box, text=None, display_color=(0, 0, 255))
     """
     (x1, y1, x2, y2) = boundary_box.get_iou_coords()
 
-    x1 = int(x1 * image.shape[1])
-    x2 = int(x2 * image.shape[1])
-    y1 = int(y1 * image.shape[0])
-    y2 = int(y2 * image.shape[0])
+    labeled_image = np.copy(image)
 
-    image = cv2.rectangle(image, (x1, y1), (x2, y2), display_color, 1)
+    x1 = int(x1 * labeled_image.shape[1])
+    x2 = int(x2 * labeled_image.shape[1])
+    y1 = int(y1 * labeled_image.shape[0])
+    y2 = int(y2 * labeled_image.shape[0])
+
+    labeled_image = cv2.rectangle(labeled_image, (x1, y1), (x2, y2), display_color, 1)
 
     if not text is None:
-        cv2.putText(image, text, (x1, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 1, display_color, 1)
+        cv2.putText(labeled_image, text, (x1, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 1, display_color, 1)
 
-    return image
+    return labeled_image
 
 
 def label_yolo_image_batch(batch, labels, masks, abc_config):

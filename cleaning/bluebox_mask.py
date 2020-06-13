@@ -53,7 +53,7 @@ def get_mask_for_bluebox_image(image):
 
     black[boolean_mask] = white[boolean_mask]
 
-    return black
+    return black, boolean_mask
 
 
 def get_masked_dataset(dataset):
@@ -63,9 +63,13 @@ def get_masked_dataset(dataset):
     :return: The numpy array of the masks.
     """
     masked_dataset = []
+    boolean_masks = []
 
     for image in dataset:
 
-        masked_dataset.append(get_mask_for_bluebox_image(image))
+        mask, bool_mask = get_mask_for_bluebox_image(image)
 
-    return np.array(masked_dataset)
+        masked_dataset.append(mask)
+        boolean_masks.append(bool_mask)
+
+    return np.array(masked_dataset), np.array(boolean_masks)

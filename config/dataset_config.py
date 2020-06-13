@@ -30,9 +30,19 @@ mask_folder = 'mask_dataset'
 transformed_folder = 'transformed_dataset'
 
 """
+    Folder of the transformed (flipped and rotated) mask data set in the 'dataset_folder' folder.
+"""
+transformed_mask_folder = 'transformed_mask_dataset'
+
+"""
     Folder of the labeled data set in the 'dataset_folder' folder.
 """
 labeled_folder = 'labeled_dataset'
+
+"""
+    Folder of the augmented data set in the 'dataset_folder' folder.
+"""
+augmented_folder = 'augmented_dataset'
 
 """
     True if all steps during the preparation should be saved, false otherwise.
