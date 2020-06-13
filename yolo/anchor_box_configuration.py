@@ -8,14 +8,13 @@ class anchor_box_config:
     There are fixed anchor boxes for each grid cell that are calculated based on the configuration given.
     """
 
-    def __init__(self, img_w, img_h, grids, box_h, aspect_ratios):
+    def __init__(self, img_d, grids, box_h, aspect_ratios):
         """
         Initializes the anchor box configuration.
         The anchor boxes are calculated based on the list of heights and
         the list of aspect ratios given. There will be a total of
         len(box_h) * len(aspect_ratios) anchor boxes for each grid cell.
-        :param img_w: Width of the input image.
-        :param img_h: Height of the input image.
+        :param img_d: Dimensions of the image, tuple of width and height.
         :param grids: Tuple of ints, the vertical and horizontal YOLO grid cells.
         :param box_h: List of anchor box heights used for each YOLO grid cells.
                       This is a list of floats representing the anchor box
@@ -25,6 +24,9 @@ class anchor_box_config:
         """
         self.grids_v = grids[0]
         self.grids_h = grids[1]
+
+        img_w = img_d[0]
+        img_h = img_d[1]
 
         self.anchor_boxes_per_grid = len(box_h) * len(aspect_ratios)
 

@@ -30,6 +30,11 @@ mask_folder = 'mask_dataset'
 transformed_folder = 'transformed_dataset'
 
 """
+    Folder of the labeled data set in the 'dataset_folder' folder.
+"""
+labeled_folder = 'labeled_dataset'
+
+"""
     True if all steps during the preparation should be saved, false otherwise.
 """
 save_all_data = True

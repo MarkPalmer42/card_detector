@@ -76,7 +76,7 @@ def read_contents(label_file_path):
         # The first line of the file should contain the dimensions of the labels.
         with open(label_file_path, 'r') as handle:
             dims = [int(x) for x in next(handle).split('\t')]
-            labels = [float(x) for x in next(handle).split('\t')]
+            labels = [float(x) if not x == 'None' else None for x in next(handle).split('\t')]
 
     return np.array(dims), np.array(labels)
 

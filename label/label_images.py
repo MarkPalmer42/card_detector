@@ -1,22 +1,16 @@
 
-import os
-from utilities import folder_utils as fu
 import cv2
 import numpy as np
 from yolo import box as ab
-from config import config as cfg
-from cleaning import clean_data as cd
 
 
-def get_boundary_box_from_image(image):
+def get_boundary_box_from_image(image, mask):
     """
     Calculates the boundary box for the input image.
     :param image: The input image.
+    :param mask: The mask associated with the image.
     :return: The boundary box of the object in the image.
     """
-    # Gets the mask used for cleaning the data.
-    mask = cd.get_mask_for_bluebox_image(image)
-
     # Determines which columns and rows don't have object in them
     # (columns and rows that are completely masked out).
     vertical_mask = np.any(mask, axis=0)
@@ -33,11 +27,11 @@ def get_boundary_box_from_image(image):
     lower_boundaries = np.maximum(image.shape[0] - np.argmax(np.flip(mask, 0), axis=0), 0.0)
 
     # Creating filter numpy arrays for maximum and minimum search later.
-    max_filter_x = np.ones(mask.shape[0]) * image.shape[1]
-    min_filter_x = np.ones(mask.shape[0]) * -1
+    max_filter_x = np.ones((mask.shape[0], mask.shape[2])) * image.shape[1]
+    min_filter_x = np.ones((mask.shape[0], mask.shape[2])) * -1
 
-    max_filter_y = np.ones(mask.shape[1]) * image.shape[0]
-    min_filter_y = np.ones(mask.shape[1]) * -1
+    max_filter_y = np.ones((mask.shape[1], mask.shape[2])) * image.shape[0]
+    min_filter_y = np.ones((mask.shape[1], mask.shape[2])) * -1
 
     # Mask the unneeded data from the boundary arrays with irrelevant data
     # for the min / max search to be ignored. (The original boundary arrays
@@ -66,21 +60,18 @@ def get_boundary_box_from_image(image):
     return ab.box(midcord_x, midcord_y, w, h)
 
 
-def get_yolo_output_from_image(image, anchor_box_conf, class_count, current_class):
+def get_yolo_output_from_image(boundary_box, anchor_box_conf, class_count, current_class):
     """
     Determines the yolo output of a numpy image.
-    :param image: The numpy array of the image.
+    :param boundary_box: The boundary box of the image.
     :param anchor_box_conf: The anchor box configuration
     :param class_count: The number of classes.
     :param current_class: The class represented in the image.
     :return:
     """
-    box = get_boundary_box_from_image(image)
-
-    display_image(image, box)
 
     # Determine the matching anchor box.
-    (idi, idj, idk) = anchor_box_conf.get_matching_anchor_box_indices(box)
+    (idi, idj, idk) = anchor_box_conf.get_matching_anchor_box_indices(boundary_box)
 
     anchor_box_per_grid = anchor_box_conf.get_anchor_boxes_per_grid_cell()
     (grid_v, grid_h) = anchor_box_conf.get_grid_dimensions()
@@ -94,7 +85,7 @@ def get_yolo_output_from_image(image, anchor_box_conf, class_count, current_clas
             for k in range(anchor_box_per_grid):
                 output[i][j][k][0] = 0.0
 
-    (x, y, w, h) = box.get_yolo_coords()
+    (x, y, w, h) = boundary_box.get_yolo_coords()
 
     # Set the yolo coords for the anchor box of the object.
     output[idi][idj][idk][0] = 1.0
@@ -112,9 +103,9 @@ def get_yolo_output_from_image(image, anchor_box_conf, class_count, current_clas
     return output
 
 
-def display_image(image, boundary_box, text=None, display_color=(0, 0, 255)):
+def get_labeled_image(image, boundary_box, text=None, display_color=(0, 0, 255)):
     """
-    Displays the image.
+    Generates a labeled image.
     :param image: The image to be displayed.
     :param boundary_box: The boundary box to display on the image.
     :param text: The text to display on the boundary box.
@@ -133,89 +124,31 @@ def display_image(image, boundary_box, text=None, display_color=(0, 0, 255)):
     if not text is None:
         cv2.putText(image, text, (x1, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 1, display_color, 1)
 
-    cv2.imshow('image', image)
-    cv2.waitKey(0)
+    return image
 
 
-def dict_to_csv(d, delimiter='\t', line_feed='\r\n'):
+def label_yolo_image_batch(batch, labels, masks, abc_config):
     """
-    Converts a dictionary to a csv string.
-    :param d: The input dictionary.
-    :param delimiter: The delimiter of the csv string.
-    :param line_feed: The line feed used in the csv.
-    :return: The csv string.
+    Labels a batch of images.
+    :param batch: The batch of images.
+    :param labels: Labels for the batch of images containing one value per example in range (0, class_count).
+    :param masks: The masks associated with the batch of images.
+    :param abc_config: Anchor box configuration of the YOLO algorithm.
+    :return: A batch of images with displayed labels as well as the YOLO labels for the batch.
     """
-    output = ""
+    class_count = int(np.max(labels) + 1)
 
-    for (key, item) in d.items():
-        output += key
-        output += delimiter.join([str(x) for x in item])
-        output += line_feed
+    yolo_labels = []
+    labeled_batch = []
 
-    return output
+    for i in range(len(batch)):
 
+        boundary_box = get_boundary_box_from_image(batch[i], masks[i])
 
-def get_boundary_box(source_path, image_extension='.jpg', verbose=True):
+        yolo_output = get_yolo_output_from_image(boundary_box, abc_config, class_count, int(labels[i]))
 
-    # Create target path if not exists, truncate otherwise
-    #fu.create_truncated_folder(target_path)
+        labeled_batch.append(get_labeled_image(batch[i], boundary_box))
 
+        yolo_labels.append(yolo_output)
 
-    # Loop over files in the source_path folder
-    for image_file in fu.list_video_files_with_class(source_path, image_extension):
-
-        if verbose:
-            print("Labeling " + image_file)
-
-        # Open image file
-        image = cv2.imread(image_file)
-
-        # Image text
-        image_text = image_file.split(os.path.sep)[-1]
-
-        # Get boundary box of image.
-        boundary_box = get_boundary_box_from_image(image)
-
-        display_image(image, boundary_box)
-
-
-
-def label_images(source_path, target_path, anchor_box_config, image_extension='.jpg', verbose=True):
-    """
-    Traverses trough the source_path, label all images found.
-    The images have to be cleaned with black background.
-    :param source_path: The path containing the images, traversed recursively.
-    :param target_path: The path to save the labels into.
-    :param image_extension: The extension of the images.
-    :param verbose: Writes to the consoles which file is being converted.
-    :return: -
-    """
-    # Create target path if not exists, truncate otherwise
-    fu.create_truncated_folder(target_path)
-
-    labels = {}
-
-    # Loop over files in the source_path folder
-    for image_file in fu.list_video_files_with_class(source_path, image_extension):
-
-        if verbose:
-            print("Labeling " + image_file)
-
-        # Open image file
-        image = cv2.imread(image_file)
-
-        # Image text
-        img_text = image_file.split(os.path.sep)[-1]
-
-        # Retrieve YOLO output for the input image
-        labels[img_text] = np.ndarray.flatten(get_yolo_output_from_image(image, anchor_box_config, cfg.class_count, 1))
-
-    file_path = os.path.join(target_path, 'labels.json')
-
-    fd = os.open(file_path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC | os.O_TEXT)
-
-    os.write(fd, dict_to_csv(labels).encode())
-
-    os.close(fd)
-
-
+    return np.array(labeled_batch), np.array(yolo_labels)

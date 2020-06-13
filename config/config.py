@@ -1,13 +1,9 @@
 
 """
-    Width of the input image.
+    Dimensions of the input images.
+    Tuple of width and height.
 """
-input_width = 640
-
-"""
-    Height of the input image.
-"""
-input_height = 480
+image_dims = (640, 480)
 
 """
     Number of color channels in the input image.
@@ -34,12 +30,12 @@ yolo_grids = (8, 8)
     Expresses the height of the anchor boxes compare to the height of the input image.
     Example: 0.6 means that the anchor box will take up 60% of the image's height.
 """
-anchor_box_heights = [0.95, 0.83, 0.71, 0.59, 0.47, 0.35]
+ab_heights = [0.95, 0.83, 0.71, 0.59, 0.47, 0.35]
 
 """"
     List of tuples of floating point numbers. These values express the aspect ratio of
     the anchor boxes. The anchor boxes' widths will be calculated based on these values
     as well as the aspect ratio of the input image.
 """
-anchor_box_aspect_ratios = [(29.0, 44.0)]
+ab_aspect_ratios = [(29.0, 44.0)]
 

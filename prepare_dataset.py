@@ -15,6 +15,9 @@ import cleaning.bluebox_mask as bm
 import cleaning.clean_data as cd
 import augmentation.transform as tf
 import utilities.load_dataset as ld
+import label.label_images as li
+import yolo.anchor_box_configuration as abc
+import config.config as cfg
 
 dataset_paths = {}
 
@@ -22,6 +25,7 @@ dataset_paths['converted'] = os.path.join(dc.dataset_folder, dc.converted_folder
 dataset_paths['cleaned'] = os.path.join(dc.dataset_folder, dc.cleaned_folder)
 dataset_paths['mask'] = os.path.join(dc.dataset_folder, dc.mask_folder)
 dataset_paths['transformed'] = os.path.join(dc.dataset_folder, dc.transformed_folder)
+dataset_paths['labeled'] = os.path.join(dc.dataset_folder, dc.labeled_folder)
 
 sd.truncate_folders(dataset_paths.values())
 
@@ -29,7 +33,7 @@ dataset_paths['original'] = os.path.join(dc.dataset_folder, dc.original_folder)
 
 cv.convert_video_to_images(dataset_paths['original'], dataset_paths['converted'])
 
-for batch in ld.load_batch_images(dataset_paths['converted'], 128):
+for batch in ld.load_batch_images(dataset_paths['converted'], 64):
 
     (dataset, labels), index, len_batches = batch
 
@@ -39,10 +43,18 @@ for batch in ld.load_batch_images(dataset_paths['converted'], 128):
 
     sd.save_all(dataset_paths['mask'], masks, labels)
 
-    clean_data = cd.clean_dataset(dataset, masks, verbose=dc.verbose)
+    dataset = cd.clean_dataset(dataset, masks, verbose=dc.verbose)
 
-    sd.save_all(dataset_paths['cleaned'], clean_data, labels)
+    sd.save_all(dataset_paths['cleaned'], dataset, labels)
 
-    transformed_data, transformed_labels = tf.transform_image(clean_data, labels, verbose=dc.verbose)
+    dataset, labels = tf.transform_image(dataset, labels, verbose=dc.verbose)
 
-    sd.save_all(dataset_paths['transformed'], transformed_data, transformed_labels)
+    sd.save_all(dataset_paths['transformed'], dataset, labels)
+
+    abc_config = abc.anchor_box_config(cfg.image_dims, cfg.yolo_grids, cfg.ab_heights, cfg.ab_aspect_ratios)
+
+    masks = bm.get_masked_dataset(dataset)
+
+    yolo_batch, labels = li.label_yolo_image_batch(dataset, labels, masks, abc_config)
+
+    sd.save_all(dataset_paths['labeled'], yolo_batch, labels)

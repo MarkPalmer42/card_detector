@@ -84,28 +84,6 @@ def has_file_with_extension(path, extension):
     return False
 
 
-def get_number_of_classes(path, extension):
-    """
-    Retrieves the number of different classes from the directory path the input data set.
-    :param path: The directory path to be checked.
-    :param extension: The extension to look for.
-    :return: The number of classes that the data set has.
-    """
-    class_count = 0
-
-    for v in os.listdir(path):
-
-        file_path = os.path.join(path, v)
-
-        if os.path.isdir(file_path) and has_file_with_extension(file_path, extension):
-            class_count = class_count + 1
-
-        elif v.lower().endswith(extension):
-            class_count = class_count + 1
-
-    return class_count
-
-
 def create_truncated_folder(path):
     """
     Deletes all the contents of the given folder.

@@ -17,8 +17,6 @@ def convert_video_to_images(source_path, target_path, video_extension='mov', ima
     :return: The data set and the labels
     """
 
-    c = fu.get_number_of_classes(source_path, video_extension)
-
     fu.create_truncated_folder(target_path)
 
     labels = []
@@ -40,8 +38,7 @@ def convert_video_to_images(source_path, target_path, video_extension='mov', ima
 
             if counter % dc.keep_images == 0:
                 cv2.imwrite(os.path.join(target_path, str(index) + '.' + image_extension), image)
-                labels.append([0.0] * c)
-                labels[-1][cls] = 1.0
+                labels.append(cls)
                 index = index + 1
 
             success, image = vidcap.read()
