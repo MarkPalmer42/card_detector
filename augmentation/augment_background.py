@@ -21,9 +21,16 @@ def batch_augment_background(batch, masks, labels):
 
     for i in range(len(batch)):
 
-        for color in tc.background_colors:
+        for j in range(tc.background_augmentation_count):
 
-            augmented_batch.append(modify_background_color(batch[i], masks[i], color))
+            crange = tc.bg_color_ranges
+            rand = np.random.rand(len(crange))
+            color = []
+
+            for k in range(len(crange)):
+                color.append(int((crange[k][1] - crange[k][0]) * rand[k] + crange[k][0]))
+
+            augmented_batch.append(modify_background_color(batch[i], masks[i], tuple(color)))
 
             augmented_labels.append(labels[i])
 

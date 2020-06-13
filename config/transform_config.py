@@ -4,8 +4,12 @@
 """
 rotations = [75, 45, 15]
 
+"""
+    Ranges for randomized background colors.
+"""
+bg_color_ranges = [(128, 255), (128, 255), (128, 255)]
 
 """
-    Background colors for augmentation.
+    Number of different background colors an example should be augmented with.
 """
-background_colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255)]
+background_augmentation_count = 1
