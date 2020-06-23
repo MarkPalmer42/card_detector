@@ -39,3 +39,7 @@ ab_heights = [0.95, 0.83, 0.71, 0.59, 0.47, 0.35]
 """
 ab_aspect_ratios = [(29.0, 44.0)]
 
+"""
+    Number of anchor boxes per grid cell.
+"""
+anchor_box_count = len(ab_heights) * len(ab_aspect_ratios)

@@ -77,7 +77,7 @@ def get_yolo_output_from_image(boundary_box, anchor_box_conf, class_count, curre
     (grid_v, grid_h) = anchor_box_conf.get_grid_dimensions()
 
     # Create an array of Nones with the correct dimensions.
-    output = np.empty((grid_v, grid_h, anchor_box_per_grid, 5 + class_count), dtype=object)
+    output = np.zeros((grid_v, grid_h, anchor_box_per_grid, 5 + class_count))
 
     # Set the object probability to zero.
     for i in range(grid_v):

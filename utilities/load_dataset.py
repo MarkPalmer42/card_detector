@@ -4,6 +4,17 @@ import utilities.folder_utils as fu
 import os
 import numpy as np
 
+def load_dataset(path, extension='.jpg'):
+
+    file_list = fu.list_files(path, extension)
+
+    dataset = []
+
+    for file in file_list:
+        dataset.append(cv2.imread(file))
+
+    return np.array(dataset)
+
 
 def load_batch(path, file_list, a, b):
     """
@@ -21,7 +32,7 @@ def load_batch(path, file_list, a, b):
     return np.array(batch), np.array(labels[a: b])
 
 
-def load_all_labels(path):
+def load_all_labels(path, squeeze_dims=False):
     """
     Loads all the labels from the given path.
     :param path: The directory to load the labels from.
@@ -39,9 +50,12 @@ def load_all_labels(path):
         next_line = next(handle, '')
 
         while not next_line == '':
-            labels.append([float(x) for x in next_line.split()])
+            labels.append([float(x) if not x == 'None' else None for x in next_line.split()])
 
             next_line = next(handle, '')
+
+    if squeeze_dims:
+        dims = [dims[0],  int(np.prod(dims[1:]))]
 
     return np.reshape(labels, dims)
 
