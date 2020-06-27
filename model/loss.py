@@ -27,11 +27,11 @@ def calculate_iou(ground_truth, prediction):
     :param prediction: The predictions, the format is [batch_size, grid_w, grid_h, anchor_boxes, (classes + 5)].
     :return: The loss associated with the input.
     """
-    ground_truth_midpoint = tf.slice(ground_truth, [0, 0, 0, 1], [-1, 1, 1, 2])
-    ground_truth_length = tf.slice(ground_truth, [0, 0, 0, 3], [-1, 1, 1, 2])
+    ground_truth_midpoint = tf.slice(ground_truth, [0, 0, 1], [-1, 1, 2])
+    ground_truth_length = tf.slice(ground_truth, [0, 0, 3], [-1, 1, 2])
 
-    prediction_midpoint = tf.slice(prediction, [0, 0, 0, 1], [-1, 1, 1, 2])
-    prediction_lengths = tf.slice(prediction, [0, 0, 0, 3], [-1, 1, 1, 2])
+    prediction_midpoint = tf.slice(prediction, [0, 0, 1], [-1, 1, 2])
+    prediction_lengths = tf.slice(prediction, [0, 0, 3], [-1, 1, 2])
 
     ground_truth_point1, ground_truth_point2 = transform_coordinates(ground_truth_midpoint, ground_truth_length)
     prediction_point1, prediction_point2 = transform_coordinates(prediction_midpoint, prediction_lengths)
@@ -63,9 +63,9 @@ def calculate_class_difference(ground_truth, prediction):
     """
     class_count = 1
 
-    ground_truth_class = tf.slice(ground_truth, [0, 0, 0, 5], [-1, 1, 1, class_count])
+    ground_truth_class = tf.slice(ground_truth, [0, 0, 5], [-1, 1, class_count])
 
-    prediction_class = tf.slice(prediction, [0, 0, 0, 5], [-1, 1, 1, class_count])
+    prediction_class = tf.slice(prediction, [0, 0, 5], [-1, 1, class_count])
 
     difference = tf.subtract(ground_truth_class, prediction_class)
 
@@ -96,11 +96,11 @@ def yolo_loss_function(y_ground_truth, y_prediction):
 
     detection_loss = tf.reduce_sum(masked)
 
-    ge_mat = tf.slice(y_ground_truth, [0, 0, 0, 0, 0], [1, 8, 8, 1, 1])
+    ge_mat = tf.slice(y_ground_truth, [0, 0, 0, 0, 0], [-1, 8, 8, 1, 1])
 
     ge_mat = tf.math.greater_equal(ge_mat, 0.5)
 
-    ge_mat = tf.squeeze(ge_mat)
+    ge_mat = tf.squeeze(ge_mat, [3, 4])
 
     masked_pred = tf.boolean_mask(y_prediction, ge_mat)
 

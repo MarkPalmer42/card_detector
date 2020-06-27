@@ -47,13 +47,13 @@ class yolo_model:
         self.model.compile(optimizer='Adam', loss=l.yolo_loss_function, metrics=['accuracy'])
         self.model.fit(train_x, train_y, batch_size=tc.batch_size, epochs=tc.epochs)
 
-    def evaluate(self, test_ds):
+    def evaluate(self, test_x, test_y):
         """
         Evaluates the model based on the given test data.
         :param test_ds: The test data.
         :return: The evaluation of the model.
         """
-        return self.model.evaluate(test_ds)
+        return self.model.evaluate(test_x, test_y)
 
     def print_summary(self):
         """
