@@ -37,23 +37,23 @@ class yolo_model:
         self.model.add(tf.keras.layers.Dense(128, activation='relu'))
         self.model.add(tf.keras.layers.Dense(output_count, activation='sigmoid'))
 
-    def fit(self, train_x, train_y):
+    def fit(self, train_ds, validation_ds=None):
         """
         Trains the model.
-        :param train_x: The training examples.
-        :param train_y: The training labels.
+        :param train_ds: The training examples dataset.
+        :param validation_ds: The validation examples dataset.
         :return: -
         """
         self.model.compile(optimizer='Adam', loss=l.yolo_loss_function, metrics=['accuracy'])
-        self.model.fit(train_x, train_y, batch_size=tc.batch_size, epochs=tc.epochs)
+        self.model.fit(train_ds, epochs=tc.epochs, validation_data=validation_ds)
 
-    def evaluate(self, test_x, test_y):
+    def evaluate(self, test_ds):
         """
         Evaluates the model based on the given test data.
         :param test_ds: The test data.
         :return: The evaluation of the model.
         """
-        return self.model.evaluate(test_x, test_y)
+        return self.model.evaluate(test_ds)
 
     def print_summary(self):
         """
