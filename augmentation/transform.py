@@ -33,12 +33,24 @@ def transform_image_batch(dataset, verbose=True):
 
 
 def transform_label_batch(labels):
-
+    """
+    Applies transformation to a whole batch of labels.
+    :param labels:
+    :return:
+    """
     transformed_labels = []
+
+    copies_to_be_made = len(tc.rotations) + 1
+
+    if tc.flip_vertically:
+        copies_to_be_made = copies_to_be_made + 1
+
+    if tc.flip_horizontally:
+        copies_to_be_made = copies_to_be_made + 1
 
     for i in range(len(labels)):
 
-        for j in range(len(tc.rotations) + 3):
+        for j in range(copies_to_be_made):
             transformed_labels.append(labels[i])
 
     return np.array(transformed_labels)
