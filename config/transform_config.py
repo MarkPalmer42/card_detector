@@ -5,6 +5,16 @@
 rotations = [75, 45, 15]
 
 """
+    Whether or not the image should be flipped horizontally during transformation.
+"""
+flip_horizontally = True
+
+"""
+    Whether or not the image should be flipped vertically during transformation.
+"""
+flip_vertically = True
+
+"""
     Ranges for randomized background colors.
 """
 bg_color_ranges = [(128, 255), (128, 255), (128, 255)]

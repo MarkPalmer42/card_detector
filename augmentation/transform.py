@@ -20,8 +20,11 @@ def transform_image_batch(dataset, verbose=True):
 
         transormed_data.append(dataset[i])
 
-        transormed_data.append(np.flip(dataset[i], axis=0))
-        transormed_data.append(np.flip(dataset[i], axis=1))
+        if tc.flip_horizontally:
+            transormed_data.append(np.flip(dataset[i], axis=0))
+
+        if tc.flip_vertically:
+            transormed_data.append(np.flip(dataset[i], axis=1))
 
         for rotation in tc.rotations:
             transormed_data.append(nd.rotate(dataset[i], rotation, reshape=False))
