@@ -4,17 +4,6 @@ import utilities.folder_utils as fu
 import os
 import numpy as np
 
-def load_dataset(path, extension='.jpg'):
-
-    file_list = fu.list_files(path, extension)
-
-    dataset = []
-
-    for file in file_list:
-        dataset.append(cv2.imread(file))
-
-    return np.array(dataset)
-
 
 def load_batch(path, file_list, a, b):
     """
