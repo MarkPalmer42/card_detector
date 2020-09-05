@@ -4,7 +4,13 @@ import config.transform_config as tc
 
 
 def modify_background_color(image, mask, color):
-
+    """
+    Modifies the background of the given image.
+    :param image: The image to be modified.
+    :param mask: The mask of the image.
+    :param color: The color to be used.
+    :return: The modified image.
+    """
     new_image = np.ones(image.shape) * color
 
     boolean_mask = mask > 10
@@ -15,7 +21,13 @@ def modify_background_color(image, mask, color):
 
 
 def batch_augment_background(batch, masks, labels):
-
+    """
+    Augments the background of the given batch of examples.
+    :param batch: The batch to be augmented.
+    :param masks: The masks of the batch examples.
+    :param labels: The labels of the examples.
+    :return: The augmented batch and labels.
+    """
     augmented_batch = []
     augmented_labels = []
 

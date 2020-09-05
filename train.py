@@ -1,4 +1,6 @@
-
+"""
+    This source file trains the yolo model for object recognititon.
+"""
 import model.model as m
 import config.dataset_config as cd
 import os
