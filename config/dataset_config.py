@@ -25,6 +25,12 @@ cleaned_folder = 'cleaned_dataset'
 mask_folder = 'mask_dataset'
 
 """
+    Folder of the masks used to clean the data set in the 'dataset_folder' folder.
+    These masks are slightly modified to mask out the shadows of the images.
+"""
+shadow_mask_folder = 'shadow_mask_dataset'
+
+"""
     Folder of the transformed (flipped and rotated) data set in the 'dataset_folder' folder.
 """
 transformed_folder = 'transformed_dataset'
@@ -58,7 +64,7 @@ save_all_data = True
     The frequency of keeping images from the input video files. 1 does not skip, 2 keeps each 2nd,
     3 keeps each 3rd, etc...
 """
-keep_images = 40
+keep_images = 3
 
 """
     True if the process status of the data set preparation should be written on the console, false otherwise.

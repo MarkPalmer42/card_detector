@@ -25,6 +25,7 @@ dataset_paths = {}
 dataset_paths['converted'] = os.path.join(dc.dataset_folder, dc.converted_folder)
 dataset_paths['cleaned'] = os.path.join(dc.dataset_folder, dc.cleaned_folder)
 dataset_paths['mask'] = os.path.join(dc.dataset_folder, dc.mask_folder)
+dataset_paths['shadow_mask'] = os.path.join(dc.dataset_folder, dc.shadow_mask_folder)
 dataset_paths['transformed'] = os.path.join(dc.dataset_folder, dc.transformed_folder)
 dataset_paths['transformed_mask'] = os.path.join(dc.dataset_folder, dc.transformed_mask_folder)
 dataset_paths['labeled'] = os.path.join(dc.dataset_folder, dc.labeled_folder)
@@ -46,9 +47,10 @@ for batch in ld.load_batch_images(dataset_paths['converted'], 16):
 
     sd.save_all(dataset_paths['mask'], masks, labels)
 
-    dataset = cd.clean_dataset(dataset, masks, verbose=dc.verbose)
+    dataset, masks = cd.clean_dataset(dataset, masks, verbose=dc.verbose)
 
     sd.save_all(dataset_paths['cleaned'], dataset, labels)
+    sd.save_all(dataset_paths['shadow_mask'], masks, labels)
 
     dataset = tf.transform_image_batch(dataset, verbose=dc.verbose)
     masks = tf.transform_image_batch(masks, verbose=dc.verbose)
