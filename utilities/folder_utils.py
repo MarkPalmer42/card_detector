@@ -62,8 +62,17 @@ def list_files(path, extension):
         elif v.lower().endswith(extension):
             file_list.append(file_path)
 
-    return file_list
+    return sorted(file_list, key=sort_numerically)
 
+
+def sort_numerically(file_name):
+    """
+    A function used to sort the file names numerically instead of alphabetically.
+    The function converts the file name into an integer to be used during sorting.
+    :param file_name: The name of the file to be converted.
+    :return: The name of the input file in integer.
+    """
+    return int(file_name.split('.')[0].split('\\')[-1])
 
 def has_file_with_extension(path, extension):
     """
