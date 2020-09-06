@@ -174,7 +174,7 @@ class yolo_model:
         :param validation_ds: The validation examples dataset.
         :return: -
         """
-        self.model.compile(optimizer='Adam', loss=l.yolo_loss_function, metrics=['accuracy'])
+        self.model.compile(optimizer='Adam', loss=l.yolo_loss_fn, metrics=['accuracy'])
         self.model.fit(train_ds, epochs=tc.epochs, validation_data=validation_ds)
 
     def evaluate(self, test_ds):
