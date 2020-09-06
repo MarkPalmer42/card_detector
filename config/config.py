@@ -13,7 +13,7 @@ color_channels = 3
 """
     Number of classes to detect.
 """
-class_count = 55
+class_count = 1
 
 """
     Dictionary of classes. Optionally it can be specified, but not necessary.
@@ -43,3 +43,8 @@ ab_aspect_ratios = [(29.0, 44.0)]
     Number of anchor boxes per grid cell.
 """
 anchor_box_count = len(ab_heights) * len(ab_aspect_ratios)
+
+"""
+    The shape of the output predictions of the model.
+"""
+output_shape = (yolo_grids[0], yolo_grids[1], anchor_box_count, class_count + 5)
