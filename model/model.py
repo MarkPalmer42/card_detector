@@ -201,3 +201,80 @@ class yolo_model:
 
         self.model.save(file)
 
+    def non_max_supression(self, detections):
+        """
+        Performs non-max supression on the detections.
+        :param detections: The list of detections for each class.
+        :return: The detection array without the
+        """
+        suppressed_detections = [[] * (self.output_shape[-1] - 5)]
+
+        yolo_boxes = []
+
+        for i in range(len(detections)):
+
+            yolo_boxes.append([])
+
+            for j in range(len(detections[i])):
+
+                x = detections[i][j][1]
+                y = detections[i][j][2]
+                w = detections[i][j][3]
+                h = detections[i][j][4]
+
+                yolo_boxes[i].append(b.box(x, y, w, h))
+
+        for i in range(len(detections)):
+
+            if len(detections[i]) != 0:
+                processed_elements = np.zeros(len(detections[i]), dtype=bool)
+
+                while not np.all(processed_elements):
+                    max_ind = -1
+
+                    for j in range(len(detections[i])):
+                        if not processed_elements[j] and detections[i][j][0] > detections[i][max_ind][0]:
+                            max_ind = j
+
+                    for j in range(len(detections[i])):
+                        if not processed_elements[j]:
+                            if yolo_boxes[i][j].calculate_iou(yolo_boxes[i][max_ind]) > mc.non_max_supression_threhold:
+                                processed_elements[j] = True
+
+                    suppressed_detections[i].append(yolo_boxes[i][max_ind])
+
+        return suppressed_detections
+
+    def predict(self, input_image):
+        """
+        Predicts based on the given input.
+        :param input_image: The image to run the prediction on.
+        :return: Prediction.
+        """
+
+        prediction = self.model.predict(input_image)
+
+        prediction = np.reshape(prediction, self.output_shape)
+
+        detections = [[] * (self.output_shape[-1] - 5)]
+
+        for i in range(8):
+            for j in range(8):
+                for k in range(6):
+                    if prediction[i][j][k][0] > mc.detection_threshold:
+
+                        w = prediction[i][j][k][3]
+                        h = prediction[i][j][k][4]
+
+                        if w > 0 and h > 0:
+                            max_class = 0
+
+                            for l in range(1, self.output_shape[-1] - 5):
+                                if prediction[i][j][k][max_class + 5] < prediction[i][j][k][l + 5]:
+                                    max_class = l
+
+                            detections[max_class].append(prediction[i][j][k][0:5])
+
+        suppressed_detections = self.non_max_supression(detections)
+
+        return suppressed_detections
