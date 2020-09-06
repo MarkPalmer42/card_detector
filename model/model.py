@@ -1,18 +1,21 @@
 
 import tensorflow as tf
+import numpy as np
 import model.loss as l
 import config.train_config as tc
 import config.model_config as mc
 import os
-
+import yolo.box as b
+import config.config as cfg
 
 class yolo_model:
 
-    def __init__(self, model):
+    def __init__(self, model, output_shape):
         """
         Constructor of the yolo_model class.
         :param model: The model to be used.
         """
+        self.output_shape = output_shape
         self.model = model
 
     @classmethod
@@ -25,43 +28,144 @@ class yolo_model:
         """
         output_count = grid_wh[0] * grid_wh[1] * ab_count * (class_count + 5)
 
-        init_model = tf.keras.models.Sequential()
+        shape = (480, 640, 3)
 
-        init_model.add(tf.keras.layers.Conv2D(32, 3, activation='relu',
-                                              input_shape=(480, 640, 3), data_format="channels_last"))
-        init_model.add(tf.keras.layers.MaxPool2D())
+        inputs = tf.keras.layers.Input(shape=shape)
 
-        init_model.add(tf.keras.layers.Conv2D(64, 3, activation='relu'))
-        init_model.add(tf.keras.layers.MaxPool2D())
+        darknet_model = cls.darknet53(shape)
 
-        init_model.add(tf.keras.layers.Conv2D(128, 3, activation='relu'))
-        init_model.add(tf.keras.layers.MaxPool2D())
+        (x_large, x_medium, x_small) = darknet_model(inputs)
 
-        init_model.add(tf.keras.layers.Conv2D(256, 3, activation='relu'))
-        init_model.add(tf.keras.layers.MaxPool2D())
+        y_small, sample_x = cls.yolo_detector(x_small, name='small_scale')
 
-        init_model.add(tf.keras.layers.Conv2D(512, 3, activation='relu'))
-        init_model.add(tf.keras.layers.MaxPool2D())
+        y_medium, sample_x = cls.yolo_detector(x_medium, name='medium_scale', detector_input=sample_x)
 
-        init_model.add(tf.keras.layers.Flatten())
-        init_model.add(tf.keras.layers.Dense(128, activation='relu'))
-        init_model.add(tf.keras.layers.Dense(output_count, activation='sigmoid'))
+        y_large, _ = cls.yolo_detector(x_large, name='large_scale', detector_input=sample_x)
 
-        return cls(init_model)
+        yolo_model = tf.keras.Model(inputs, (y_small, y_medium, y_large))
+
+        return cls(yolo_model, (grid_wh[0], grid_wh[1], ab_count, class_count + 5))
 
     @classmethod
-    def load_from_file(cls, filename):
+    def darknet53(cls, input_shape):
+
+        inputs = tf.keras.layers.Input(shape=input_shape)
+
+        x = cls.darknet_conv(inputs, 32, kernel_size=3, stride=1, name='conv2d_0')
+
+        x = cls.darknet_conv(x, 64, kernel_size=3, stride=2, name='conv2d_1')
+
+        x = cls.darknet_residual(x, 32, 64, 'residual_0_0')
+
+        x = cls.darknet_conv(x, 128, kernel_size=3, stride=2, name='conv2d_2')
+
+        for i in range(2):
+            x = cls.darknet_residual(x, 64, 128, 'residual_1_' + str(i))
+
+        x = cls.darknet_conv(x, 256, kernel_size=3, stride=2, name='conv2d_3')
+
+        for i in range(8):
+            x = cls.darknet_residual(x, 128, 256, 'residual_2_' + str(i))
+
+        y0 = x
+
+        x = cls.darknet_conv(x, 512, kernel_size=3, stride=2, name='conv2d_4')
+
+        for i in range(8):
+            x = cls.darknet_residual(x, 256, 512, 'residual_3_' + str(i))
+
+        y1 = x
+
+        x = cls.darknet_conv(x, 1024, kernel_size=3, stride=2, name='conv2d_5')
+
+        for i in range(4):
+            x = cls.darknet_residual(x, 512, 1024, 'residual_4_' + str(i))
+
+        y2 = x
+
+        return tf.keras.Model(inputs, (y0, y1, y2), name='darknet_53')
+
+    @classmethod
+    def darknet_conv(cls, inputs, filters, kernel_size, stride, name):
+
+        x = tf.keras.layers.Conv2D(
+            filters=filters,
+            kernel_size=kernel_size,
+            strides=stride,
+            padding='same',
+            name=name + '_conv2d',
+            use_bias=False
+        )(inputs)
+
+        x = tf.keras.layers.BatchNormalization(name=name + '_bn')(x)
+
+        x = tf.keras.layers.LeakyReLU(alpha=0.01, name=name + '_leakyrelu')(x)
+
+        return x
+
+    @classmethod
+    def darknet_residual(cls, inputs, filters1, filters2, name):
+
+        shortcut = inputs
+
+        x = cls.darknet_conv(inputs, filters1, kernel_size=1, stride=1, name=name + '_1x1')
+
+        x = cls.darknet_conv(x, filters2, kernel_size=3, stride=1, name=name + '_3x3')
+
+        x = tf.keras.layers.add(inputs=[shortcut, x], name=name + '_add')
+
+        return x
+
+    @classmethod
+    def yolo_detector(cls, inputs, name, detector_input=None):
+        """
+        Implementes a YOLO detector with a certain grid output.
+        The dimensions of the output solely depends on the input shape.
+        :param inputs: The input tensor.
+        :param name: Name of the detector.
+        :param detector_input: The output of the previous YOLO detector.
+        :return: The grid and the output of the fourth convolutional layer.
+        """
+        name = 'yolo_det_' + name
+
+        if detector_input is not None:
+            detector_input = tf.keras.layers.UpSampling2D(size=(2, 2), name=name + '_upsampling')(detector_input)
+            inputs = tf.keras.layers.Concatenate(name=name + '_concat')([inputs, detector_input])
+
+        x = cls.darknet_conv(inputs, 512, kernel_size=1, stride=1, name=name + '_conv2d_0_1x1')
+
+        x = cls.darknet_conv(x, 1024, kernel_size=3, stride=1, name=name + '_conv2d_1_3x3')
+
+        x = cls.darknet_conv(x, 512, kernel_size=1, stride=1, name=name + '_conv2d_2_1x1')
+
+        x = cls.darknet_conv(x, 1024, kernel_size=3, stride=1, name=name + '_conv2d_3_3x3')
+
+        x = cls.darknet_conv(x, 512, kernel_size=1, stride=1, name=name + '_conv2d_4_1x1')
+
+        # Save the value of x for the next YOLO detector.
+        sample_x = x
+
+        x = cls.darknet_conv(x, 1024, kernel_size=3, stride=1, name=name + '_conv2d_5_3x3')
+
+        out_filters = 3 * (5 + cfg.class_count)
+
+        x = cls.darknet_conv(x, filters=out_filters, kernel_size=1, stride=1, name=name + '_conv1d_6_1x1')
+
+        return x, sample_x
+
+    @classmethod
+    def load_from_file(cls, filename, output_shape):
         """
         Loads the model from the configured file.
         :return: -
         """
         file = os.path.join(mc.model_folder, filename)
 
-        loss = l.yolo_loss_function
+        loss = l.yolo_loss_fn
 
-        loaded_model = tf.keras.models.load_model(file, custom_objects={loss.__name__: loss})
+        loaded_model = tf.keras.models.load_model(file, custom_objects={loss.__name__: loss })
 
-        return cls(loaded_model)
+        return cls(loaded_model, output_shape)
 
     def fit(self, train_ds, validation_ds=None):
         """
